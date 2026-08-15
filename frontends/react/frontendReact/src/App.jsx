@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import VehiclesPage from "./pages/VehiclesPage";
 import './App.css';
 
 function App(){
@@ -31,24 +32,7 @@ function App(){
   if (error) {
     return <p>{error}</p>
   }
-  return (
-    <main>
-      <h1>
-        Vehicles
-      </h1>
-      {vehicles.length === 0 ?(
-        <p>No vehicles found.</p>
-      ) : (
-        <ul>
-          {vehicles.map((vehicle) => (
-          <li key={vehicle.id}>
-            {vehicle.registrationNumber} - {vehicle.type} - {vehicle.capacityKg} kg
-            </li>
-           ))} 
-        </ul>
-      )}
-    </main>
-  )
+  return <VehiclesPage vehicles={vehicles} />
 
 }
 
