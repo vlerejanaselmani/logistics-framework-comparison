@@ -1,4 +1,6 @@
+import { Navigate, Route, Routes} from 'react-router-dom'
 import useVehicles from './hooks/useVehicles'
+import VehicleDetailsPage from './pages/VehicleDetailsPage';
 import VehiclesPage from "./pages/VehiclesPage";
 import './App.css';
 
@@ -13,10 +15,22 @@ function App(){
     }
 
     return (
-      <VehiclesPage 
+      <Routes>
+        <Route path="/" element={<Navigate to="/vehicles"/>} />
+        <Route
+          path="/vehicles"
+          element={
+            <VehiclesPage 
           vehicles={vehicles} 
           onCreateVehicle={createVehicle}
+           />
+          }
+        />
+        <Route
+          path="/vehicles/:id"
+          element={<VehicleDetailsPage vehicles={vehicles} />}
       />
+  </Routes>
   )
 }
 
