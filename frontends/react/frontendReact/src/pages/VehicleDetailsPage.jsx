@@ -1,8 +1,18 @@
 import { Link, useParams } from 'react-router-dom'
+import { useVehicleContext } from '../context/VehicleContext'
 
-function VehicleDetailsPage({ vehicles}) {
+function VehicleDetailsPage() {
     const {id} = useParams()
-    
+    const { vehicles, loading, error } = useVehicleContext()
+
+    if (loading) {
+        return <p>Loading vehicles...</p>
+    }
+
+    if (error){
+        return <p>{error}</p>
+    }
+
     const vehicle = vehicles.find((vehicle) => vehicle.id === Number(id))
 
     if(!vehicle) {
