@@ -40,12 +40,13 @@ function VehicleForm({ onCreateVehicle }) {
             <input
                 value={capacityKg}
                 onChange={(event) => setCapacityKg(event.target.value)}
-                typ="number"
+                type="number"
+                placeholder='Capacity in Kg'
             />
 
             <label>
                 <input
-                    value={available}
+                    checked={available}
                     onChange={(event) => setAvailable(event.target.checked)}
                     type="checkbox"
                 />
