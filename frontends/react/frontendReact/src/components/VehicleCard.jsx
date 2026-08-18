@@ -1,4 +1,5 @@
 import {Link} from 'react-router-dom'
+import { memo } from 'react'
 
 function VehicleCard({ vehicle }) {
     return (
@@ -10,6 +11,6 @@ function VehicleCard({ vehicle }) {
     )
 }
 
-export default VehicleCard
+export default memo(VehicleCard)
 
 //component + props
