@@ -1,11 +1,46 @@
-import { useEffect, useState } from "react";
+import { useEffect, useReducer } from "react";
 
 const API_URL = 'http://localhost:8080/api/vehicles'
 
+const initialState = {
+    vehicles: [],
+    loading: true,
+    error: null,
+}
+
+function vehiclesReducer(state, action) {
+    switch (action.type) {
+        case 'LOAD_SUCCESS':
+            return{
+                ...state,
+                vehicles: action.payload,
+                loading: false,
+            }
+        case 'CREATE_SUCCESS':
+            return{
+                ...state,
+                vehicles: [...state.vehicles, action.payload],
+            }
+        case 'CREATE_ERROR':
+            return{
+                ...state,
+                error: action.payload,
+            }
+        case 'LOAD_ERROR':
+            return {
+                ...state,
+                error: action.payload,
+                loading: false,
+            }
+
+        default:
+            return state
+    }
+}
+
 function useVehicles() {
-    const [vehicles, setVehicles] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+
+    const [state, dispatch] = useReducer(vehiclesReducer, initialState)
 
     useEffect(() => {
         fetch(API_URL)
@@ -17,12 +52,10 @@ function useVehicles() {
             return response.json()
            })
            .then((data)=> {
-            setVehicles(data)
-            setLoading(false)
+             dispatch({ type: 'LOAD_SUCCESS', payload: data})
            })
            .catch((error)=>{
-            setError(error.message)
-            setLoading(false)
+            dispatch({ type: 'LOAD_ERROR', payload: error.message})
            })
 
           }  ,[])
@@ -37,24 +70,24 @@ function useVehicles() {
         })
           .then((response)=>{
             if(!response.ok) {
-                throw new Error('failed to create vehicle because' + Error.body)
+                throw new Error('failed to create vehicle because' )
             }
 
             return response.json()
           })
           .then((savedVehicle) => {
-            setVehicles((currentVehicle) => [...currentVehicle, savedVehicle])
+           dispatch({ type: 'CREATE_SUCCESS', payload: savedVehicle})
           })
           .catch((error)=> {
-            setError(error.message)
+            dispatch({type: 'CREATE_ERROR', payload: error.message})
           })
     }
 
     return {
-        vehicles,
-        loading,
-        error,
-        createVehicle
+        vehicles: state.vehicles,
+        loading: state.loading,
+        error: state.error,
+        createVehicle,
     }
 
 }
