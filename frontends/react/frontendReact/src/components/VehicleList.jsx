@@ -1,6 +1,6 @@
 import VehicleCard from './VehicleCard'
 
-function VehicleList({ vehicles }) {
+function VehicleList({ vehicles, onDeleteVehicle, onEditVehicle }) {
     if (vehicles.length===0){
         return <p>No vehicles found.</p>
     }
@@ -8,7 +8,12 @@ function VehicleList({ vehicles }) {
     return (
         <ul>
             {vehicles.map((vehicle) => (
-            <VehicleCard key={vehicle.id} vehicle={vehicle} />
+            <VehicleCard
+            key={vehicle.id}
+            vehicle={vehicle}
+            onDeleteVehicle={onDeleteVehicle}
+            onEditVehicle={onEditVehicle}
+            />
             ))}
         </ul>
     )

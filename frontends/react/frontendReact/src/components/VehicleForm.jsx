@@ -1,61 +1,85 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
-function VehicleForm({ onCreateVehicle }) {
-    const [registrationNumber, setRegistrationNumber] = useState('')
-    const [type, setType] = useState('')
-    const [capacityKg, setCapacityKg] = useState('')
-    const [available, setAvailable] = useState(true)
+const initialFormState = {
+  registrationNumber: '',
+  type: '',
+  capacityKg: '',
+  available: true,
+}
 
-    function handleSubmit(event) {
-        event.preventDefault()
-        
-        onCreateVehicle({
-            registrationNumber,
-            type,
-            capacityKg: Number(capacityKg),
-            available
-        })
+function VehicleForm({ onCreateVehicle, vehicleToEdit }) {
+  const [formData, setFormData] = useState(initialFormState)
 
-        setRegistrationNumber('')
-    setType('')
-    setCapacityKg('')
-    setAvailable(true)
+  useEffect(() => {
+    if (vehicleToEdit) {
+      setFormData({
+        registrationNumber: vehicleToEdit.registrationNumber,
+        type: vehicleToEdit.type,
+        capacityKg: String(vehicleToEdit.capacityKg),
+        available: vehicleToEdit.available,
+      })
+    }
+  }, [vehicleToEdit])
+
+  function handleChange(event) {
+    const { name, value, checked, type } = event.target
+
+    setFormData((currentFormData) => ({
+      ...currentFormData,
+      [name]: type === 'checkbox' ? checked : value,
+    }))
   }
 
-        
-    return (
-        <form onSubmit={handleSubmit}>
-            <input
-                value={registrationNumber}
-                onChange={(event) => setRegistrationNumber(event.target.value)}
-                placeholder="Registration Number"
-            />
+  function handleSubmit(event) {
+    event.preventDefault()
 
-            <input
-                value={type}
-                onChange={(event) => setType(event.target.value)}
-                placeholder="Vehicle Type"
-            />
+    onCreateVehicle({
+      ...formData,
+      capacityKg: Number(formData.capacityKg),
+    })
 
-            <input
-                value={capacityKg}
-                onChange={(event) => setCapacityKg(event.target.value)}
-                type="number"
-                placeholder='Capacity in Kg'
-            />
+    setFormData(initialFormState)
+  }
 
-            <label>
-                <input
-                    checked={available}
-                    onChange={(event) => setAvailable(event.target.checked)}
-                    type="checkbox"
-                />
-                Availability
-            </label>
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        name="registrationNumber"
+        value={formData.registrationNumber}
+        onChange={handleChange}
+        placeholder="Registration Number"
+      />
 
-            <button type="submit">Add vehicle</button>
-        </form>
-    )
+      <input
+        name="type"
+        value={formData.type}
+        onChange={handleChange}
+        placeholder="Vehicle Type"
+      />
+
+      <input
+        name="capacityKg"
+        value={formData.capacityKg}
+        onChange={handleChange}
+        type="number"
+        placeholder="Capacity in Kg"
+      />
+
+      <label>
+        <input
+          name="available"
+          checked={formData.available}
+          onChange={handleChange}
+          type="checkbox"
+        />
+        Availability
+      </label>
+
+      <button type="submit">
+        {vehicleToEdit ? 'Update vehicle' : 'Add vehicle'}
+      </button>
+    </form>
+  )
 }
 
 export default VehicleForm

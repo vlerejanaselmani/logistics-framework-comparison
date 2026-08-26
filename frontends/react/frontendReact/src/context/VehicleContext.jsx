@@ -14,5 +14,11 @@ export function VehicleProvider({ children }) {
 }
 
 export function useVehicleContext(){
-    return useContext(VehicleContext)
+    const context = useContext(VehicleContext)
+
+        if(!context) {
+            throw new Error('useVehicleContext must be used inside VehicleProvider')
+        }
+
+    return context
 }
