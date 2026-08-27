@@ -1,6 +1,10 @@
 import { useEffect, useReducer } from "react";
-
-const API_URL = 'http://localhost:8080/api/vehicles'
+import {
+    createVehicle as createVehicleRequest,
+    getVehicles,
+    deleteVehicle as deleteVehicleRequest,
+    updateVehicle as updateVehicleRequest,
+} from '../api/vehicleApi'
 
 const initialState = {
     vehicles: [],
@@ -10,27 +14,55 @@ const initialState = {
 
 function vehiclesReducer(state, action) {
     switch (action.type) {
-        case 'LOAD_SUCCESS':
+        case 'LOAD_VEHICLES_SUCCESS':
             return{
                 ...state,
                 vehicles: action.payload,
                 loading: false,
+                error: null,
             }
-        case 'CREATE_SUCCESS':
+        case 'CREATE_VEHICLE_SUCCESS':
             return{
                 ...state,
                 vehicles: [...state.vehicles, action.payload],
+                error: null,
             }
-        case 'CREATE_ERROR':
+        case 'CREATE_VEHICLE_ERROR':
             return{
                 ...state,
                 error: action.payload,
             }
-        case 'LOAD_ERROR':
+        case 'LOAD_VEHICLES_ERROR':
+            return {
+                ...state,
+                vehicles: [],
+                error: action.payload,
+                loading: false,
+            }
+        case 'UPDATE_VEHICLE_SUCCESS':
+            return{
+                ...state,
+                vehicles: state.vehicles.map((vehicle) =>
+                vehicle.id === action.payload.id ? action.payload : vehicle,
+                ),
+                error:null,
+            }
+        case 'UPDATE_VEHICLE_ERROR':
+            return{
+                ...state,
+                error: action.payload,
+            }
+        case 'DELETE_VEHICLE_SUCCESS':
+            return {
+                ...state,
+                vehicles: state.vehicles.filter(
+                    (vehicle) => vehicle.id !== action.payload,
+                ),
+            }
+        case 'DELETE_VEHICLE_ERROR':
             return {
                 ...state,
                 error: action.payload,
-                loading: false,
             }
 
         default:
@@ -43,44 +75,67 @@ function useVehicles() {
     const [state, dispatch] = useReducer(vehiclesReducer, initialState)
 
     useEffect(() => {
-        fetch(API_URL)
-           .then((response) => {
-            if(!response.ok) {
-                throw new Error('Error : failed to load vehicles!')
-            }
-
-            return response.json()
-           })
-           .then((data)=> {
-             dispatch({ type: 'LOAD_SUCCESS', payload: data})
-           })
-           .catch((error)=>{
-            dispatch({ type: 'LOAD_ERROR', payload: error.message})
-           })
-
-          }  ,[])
+        getVehicles() 
+            .then((vehicles) => {
+                dispatch({
+                    type: 'LOAD_VEHICLES_SUCCESS',
+                    payload: vehicles,
+                })
+            })
+            .catch((error)=> {
+                dispatch({
+                    type: 'LOAD_VEHICLES_ERROR',
+                    payload: error.message,
+                })
+            }) 
+    }  ,[])
 
     function createVehicle(vehicle) {
-        return fetch(API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(vehicle),
-        })
-          .then((response)=>{
-            if(!response.ok) {
-                throw new Error('failed to create vehicle because' )
-            }
+        return createVehicleRequest(vehicle)
+            .then((savedVehicle) => {
+                dispatch({
+                    type: 'CREATE_VEHICLE_SUCCESS',
+                    payload: savedVehicle,
+                })
+            })
+            .catch((error) => {
+                dispatch({
+                    type: 'CREATE_VEHICLE_ERROR',
+                    payload: error.message,
+                })
+            })
+    }
 
-            return response.json()
-          })
-          .then((savedVehicle) => {
-           dispatch({ type: 'CREATE_SUCCESS', payload: savedVehicle})
-          })
-          .catch((error)=> {
-            dispatch({type: 'CREATE_ERROR', payload: error.message})
-          })
+    function updateVehicle(id, vehicle) {
+        return updateVehicleRequest(id, vehicle)
+        .then((updatedVehicle) => {
+            dispatch({
+                type: 'UPDATE_VEHICLE_SUCCESS',
+                payload: updatedVehicle,
+            })
+        })
+        .catch((error) => {
+            dispatch({
+                type: 'UPDATE_VEHICLE_ERROR',
+                payload: error.message,
+            })
+        })
+    }
+
+    function deleteVehicle(id) {
+        return deleteVehicleRequest(id)
+        .then(() => {
+            dispatch({
+            type: 'DELETE_VEHICLE_SUCCESS',
+            payload: id,
+            })
+        })
+        .catch((error) => {
+            dispatch({
+            type: 'DELETE_VEHICLE_ERROR',
+            payload: error.message,
+            })
+        })
     }
 
     return {
@@ -88,6 +143,8 @@ function useVehicles() {
         loading: state.loading,
         error: state.error,
         createVehicle,
+        updateVehicle,
+        deleteVehicle,
     }
 
 }
